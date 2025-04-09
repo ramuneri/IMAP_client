@@ -5,10 +5,14 @@ Regarding the client for testing: it is (almost) always possible to download a g
 
 I will use C language.
 
+----------------------------------------
+
+cd /mnt/c/Users/ramun/Desktop/netw/IMAP_client
 
 gcc -o imap_client imap_client.c
 ./imap_client
 
+----------------------------------------
 
 Is Dovecot running?
 sudo systemctl status dovecot
@@ -22,5 +26,11 @@ ss -tlnp | grep 143
 Restart DoveCot:
 sudo systemctl restart dovecot
 
+----------------------------------------
 
 testuser abc
+
+- Running the Dovecot IMAP server locally
+
+
+A001 LOGIN testuser password

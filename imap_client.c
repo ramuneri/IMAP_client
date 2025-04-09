@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 
 #define PORT 143
-#define SERVER "imap.example.com"  // Replace with real server
+#define SERVER "127.0.0.1" // or "localhost"
 #define BUFFER_SIZE 4096
 
 int main() {
