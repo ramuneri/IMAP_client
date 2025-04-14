@@ -36,6 +36,7 @@ int main() {
     char username[20], password[20];
     char command[256];
     int running = 1;
+    int inbox_selected = 0;
 
     printf("Enter username: ");
     scanf("%20s", username);
@@ -77,16 +78,17 @@ int main() {
         int choice;
         printf("\n-------------- IMAP Client Menu --------------\n");
         printf("1. Show folder structure (LIST)\n");
-        printf("2. Select INBOX\n");
-        printf("3. Fetch specific email header\n");
-        printf("4. Fetch specific email body\n");
-        printf("5. Mark email as seen\n");
-        printf("6. Delete email\n");
-        printf("7. Logout and exit\n");
-        printf("8. Send raw IMAP command\n");
-        printf("9. Create new folder\n");
-        printf("10. Delete a folder\n");
-        printf("11. Rename a folder\n");
+        printf("2. Create new folder\n");
+        printf("3. Delete a folder\n");
+        printf("4. Rename a folder\n");
+        printf("5. Select INBOX\n");
+        printf("6. List all message numbers in INBOX\n");
+        printf("7. Fetch specific email header\n");
+        printf("8. Fetch specific email body\n");
+        printf("9. Mark email as seen\n");
+        printf("10. Delete email\n");
+        printf("11. Send raw IMAP command\n");
+        printf("12. Logout and exit\n");
         printf("Choose: ");
         scanf("%d", &choice);
         getchar();
@@ -98,70 +100,20 @@ int main() {
                 send_command(sockfd, "LIST \"\" \"*\"", &tag_counter);
                 break;
             case 2:
-                send_command(sockfd, "SELECT INBOX", &tag_counter);
-                break;
-            case 3: {
-                int msg_id;
-                printf("Enter message number: ");
-                scanf("%d", &msg_id);
-                getchar();
-                snprintf(command, sizeof(command), "FETCH %d BODY[HEADER]", msg_id);
-                send_command(sockfd, command, &tag_counter);
-                break;
-            }
-            case 4: {
-                int msg_id;
-                printf("Enter message number: ");
-                scanf("%d", &msg_id);
-                getchar();
-                snprintf(command, sizeof(command), "FETCH %d BODY[TEXT]", msg_id);
-                send_command(sockfd, command, &tag_counter);
-                break;
-            }
-            case 5: {
-                int msg_id;
-                printf("Enter message number to mark as seen: ");
-                scanf("%d", &msg_id);
-                getchar();
-                snprintf(command, sizeof(command), "STORE %d +FLAGS (\\Seen)", msg_id);
-                send_command(sockfd, command, &tag_counter);
-                break;
-            }
-            case 6: {
-                int msg_id;
-                printf("Enter message number to delete: ");
-                scanf("%d", &msg_id);
-                getchar();
-                snprintf(command, sizeof(command), "STORE %d +FLAGS (\\Deleted)", msg_id);
-                send_command(sockfd, command, &tag_counter);
-                send_command(sockfd, "EXPUNGE", &tag_counter);
-                break;
-            }
-            case 7:
-                send_command(sockfd, "LOGOUT", &tag_counter);
-                running = 0;
-                break;
-            case 8:
-                printf("Enter raw IMAP command: ");
-                fgets(command, sizeof(command), stdin);
-                command[strcspn(command, "\n")] = 0;
-                send_command(sockfd, command, &tag_counter);
-                break;
-            case 9:
                 printf("Enter new folder name: ");
                 fgets(command, sizeof(command), stdin);
                 command[strcspn(command, "\n")] = 0;
                 snprintf(buffer, sizeof(buffer), "CREATE %s", command);
                 send_command(sockfd, buffer, &tag_counter);
                 break;
-            case 10:
+            case 3:
                 printf("Enter folder name to delete: ");
                 fgets(command, sizeof(command), stdin);
                 command[strcspn(command, "\n")] = 0;
                 snprintf(buffer, sizeof(buffer), "DELETE %s", command);
                 send_command(sockfd, buffer, &tag_counter);
                 break;
-            case 11: {
+            case 4: {
                 char new_name[256];
                 printf("Enter folder to rename: ");
                 fgets(command, sizeof(command), stdin);
@@ -173,6 +125,66 @@ int main() {
                 send_command(sockfd, buffer, &tag_counter);
                 break;
             }
+            case 5:
+                send_command(sockfd, "SELECT INBOX", &tag_counter);
+                inbox_selected = 1;
+                break;
+            case 6:
+                if (!inbox_selected) {
+                    printf("Please select INBOX first (Option 5).\n");
+                    break;
+                }
+                send_command(sockfd, "FETCH 1:* (FLAGS)", &tag_counter);
+                break;
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+                if (!inbox_selected) {
+                    printf("Please select INBOX first (Option 5).\n");
+                    break;
+                }
+                if (choice == 7) {
+                    int msg_id;
+                    printf("Enter message number: ");
+                    scanf("%d", &msg_id);
+                    getchar();
+                    snprintf(command, sizeof(command), "FETCH %d BODY[HEADER]", msg_id);
+                    send_command(sockfd, command, &tag_counter);
+                } else if (choice == 8) {
+                    int msg_id;
+                    printf("Enter message number: ");
+                    scanf("%d", &msg_id);
+                    getchar();
+                    snprintf(command, sizeof(command), "FETCH %d BODY[TEXT]", msg_id);
+                    send_command(sockfd, command, &tag_counter);
+                } else if (choice == 9) {
+                    int msg_id;
+                    printf("Enter message number to mark as seen: ");
+                    scanf("%d", &msg_id);
+                    getchar();
+                    snprintf(command, sizeof(command), "STORE %d +FLAGS (\\Seen)", msg_id);
+                    send_command(sockfd, command, &tag_counter);
+                } else if (choice == 10) {
+                    int msg_id;
+                    printf("Enter message number to delete: ");
+                    scanf("%d", &msg_id);
+                    getchar();
+                    snprintf(command, sizeof(command), "STORE %d +FLAGS (\\Deleted)", msg_id);
+                    send_command(sockfd, command, &tag_counter);
+                    send_command(sockfd, "EXPUNGE", &tag_counter);
+                }
+                break;
+            case 11:
+                printf("Enter raw IMAP command: ");
+                fgets(command, sizeof(command), stdin);
+                command[strcspn(command, "\n")] = 0;
+                send_command(sockfd, command, &tag_counter);
+                break;
+            case 12:
+                send_command(sockfd, "LOGOUT", &tag_counter);
+                running = 0;
+                break;
             default:
                 printf("Invalid choice.\n");
         }
