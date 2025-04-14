@@ -55,8 +55,9 @@ testuser2 abc
 
 - Running the Dovecot IMAP server locally
 
+Message example (send just from Ubundu terminal):
+echo "Test message content" | mail testuser
 
-A001 LOGIN testuser password
 
 
 ----------------------------------------
