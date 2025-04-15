@@ -1,6 +1,5 @@
 ![alt text](image.png)
 
-
 ## L2B
 
 Internet Message Access Protocol version 4 - LIST Command Extensions
@@ -17,8 +16,6 @@ with each new extension.  This document describes an extension to the
 base LIST command that will allow these additions to be done with
 mutually compatible options to the LIST command, avoiding the
 exponential increase in specialized list commands.
-
-
 
 ----------------------------------------
 
@@ -57,8 +54,6 @@ testuser2 abc
 
 Message example (send just from Ubundu terminal):
 echo "Test message content" | mail testuser
-
-
 
 ----------------------------------------
 
