@@ -12,7 +12,7 @@
 
 int tag_counter = 1;
 
-void send_command(int sockfd, const char *cmd_body, int *tag_counter_ptr) {
+int send_command(int sockfd, const char *cmd_body, int *tag_counter_ptr) {
     char full_command[512];
     char tag[10];
     char buffer[BUFFER_SIZE];
@@ -26,6 +26,8 @@ void send_command(int sockfd, const char *cmd_body, int *tag_counter_ptr) {
     bzero(buffer, BUFFER_SIZE);
     read(sockfd, buffer, BUFFER_SIZE - 1);
     printf("Server: %s", buffer);
+
+    return strstr(buffer, "OK") != NULL;
 }
 
 int main() {
@@ -72,26 +74,15 @@ int main() {
     send_command(sockfd, "CAPABILITY", &tag_counter);
 
     snprintf(command, sizeof(command), "LOGIN %s %s", username, password);
-    char full_command[512], tag[10];
-    snprintf(tag, sizeof(tag), "TAG%03d", tag_counter++);
-    snprintf(full_command, sizeof(full_command), "%s %s\r\n", tag, command);
-    write(sockfd, full_command, strlen(full_command));
-    printf("Client: %s", full_command);
-    
-    bzero(buffer, BUFFER_SIZE);
-    read(sockfd, buffer, BUFFER_SIZE - 1);
-    printf("Server: %s", buffer);
-    
-    if (strstr(buffer, "OK") == NULL) {
+    if (!send_command(sockfd, command, &tag_counter)) {
         fprintf(stderr, "Authentication failed. Exiting.\n");
         close(sockfd);
         return 1;
     }
-    
 
     while (running) {
         int choice;
-        printf("\n\n-------------- IMAP Client Menu --------------\n");
+        printf("\n\n\n-------------- IMAP Client Menu --------------\n");
         printf("1. Show folder structure (LIST)\n");
         printf("2. Create new folder\n");
         printf("3. Delete a folder\n");
@@ -110,7 +101,7 @@ int main() {
         scanf("%d", &choice);
         getchar();
 
-        printf("\n");
+        printf("\n\n");
 
         if (choice >= 6 && choice <= 10 && !inbox_selected) {
             printf("Please select INBOX first (Option 5).\n");
@@ -147,18 +138,21 @@ int main() {
                 send_command(sockfd, buffer, &tag_counter);
                 break;
             }
-                case 5:
+            case 5:
                 printf("Fetching available mailboxes...\n");
                 send_command(sockfd, "LIST \"\" \"*\"", &tag_counter);
-                printf("Enter mailbox to select (ex.: INBOX/Work): ");
+                printf("\nEnter mailbox to select (ex.: INBOX/Work): ");
                 fgets(command, sizeof(command), stdin);
                 command[strcspn(command, "\n")] = 0;
                 snprintf(buffer, sizeof(buffer), "SELECT %s", command);
-                send_command(sockfd, buffer, &tag_counter);
-                inbox_selected = 1;
+                if (send_command(sockfd, buffer, &tag_counter)) {
+                    inbox_selected = 1;
+                    snprintf(buffer, sizeof(buffer), "FETCH 1:* (FLAGS)");
+                    send_command(sockfd, buffer, &tag_counter);
+                } else {
+                    printf("Failed to select mailbox '%s'.\n", command);
+                }
                 break;
-        
-
             case 6:
                 send_command(sockfd, "FETCH 1:* (FLAGS)", &tag_counter);
                 break;
