@@ -62,3 +62,6 @@ A001 ... meaning:
 - The server echoes back the same tag so the client knows - “This response goes with that request.”
 - Tags are chosen by the client (server never creates them)
 - Technically we can not reuse tags
+
+To do: 
+- tą keistą funkciją
