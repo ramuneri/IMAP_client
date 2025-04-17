@@ -53,7 +53,7 @@ testuser2 abc
 - Running the Dovecot IMAP server locally
 
 Message example (send just from Ubundu terminal):
-echo "Test message content" | mail testuser
+echo "Message 1" | mail testuser
 
 ----------------------------------------
 
@@ -65,3 +65,7 @@ A001 ... meaning:
 
 To do: 
 - tą keistą funkciją
+- kad perkelti zinute i kita inbox
+
+Notes:
+- When moving message from INBOX, message is coppied to a new folder, but it also stays in INBOX.
