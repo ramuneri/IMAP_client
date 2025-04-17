@@ -54,6 +54,7 @@ testuser2 abc
 
 Message example (send just from Ubundu terminal):
 echo "Message 1" | mail testuser
+echo -e "Subject: Testing IMAP Client\nFrom: test@localhost\n\nThis is a test message." | mail -s "Testing IMAP" testuser
 
 ----------------------------------------
 
@@ -67,5 +68,13 @@ To do:
 - tą keistą funkciją
 - kad perkelti zinute i kita inbox
 
+----------------------------------------
+
+Raw IMAP commands exaples:
+LIST "" "*"
+SELECT INBOX
+FETCH 1:* (BODY[HEADER.FIELDS (From Subject Date)])
+
+----------------------------------------
+
 Notes:
-- When moving message from INBOX, message is coppied to a new folder, but it also stays in INBOX.
