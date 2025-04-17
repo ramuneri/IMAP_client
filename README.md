@@ -56,6 +56,15 @@ Message example (send just from Ubundu terminal):
 echo "Message 1" | mail testuser
 echo -e "Subject: Testing IMAP Client\nFrom: test@localhost\n\nThis is a test message." | mail -s "Testing IMAP" testuser
 
+
+With switching user:
+sudo su testuser
+echo "Message body" | mail -s "Test subject" ramune
+
+
+Without:
+echo "This is a test from testuser" | mail -s "Hello from testuser" ramune
+
 ----------------------------------------
 
 A001 ... meaning:
@@ -66,7 +75,6 @@ A001 ... meaning:
 
 To do: 
 - tą keistą funkciją
-- kad perkelti zinute i kita inbox
 
 ----------------------------------------
 
